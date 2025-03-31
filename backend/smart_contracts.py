@@ -6,10 +6,11 @@ import json
 import base64
 import algosdk
 from algosdk.v2client import algod
-from algosdk.future import transaction
-from algosdk.future.transaction import PaymentTxn, AssetConfigTxn, AssetTransferTxn, AssetOptInTxn
+from algosdk import transaction
+from algosdk.transaction import PaymentTxn, AssetConfigTxn, AssetTransferTxn, AssetOptInTxn
 from algosdk.v2client import indexer
 import logging
+import datetime
 
 smart_contracts_bp = Blueprint('smart_contracts', __name__)
 
@@ -94,7 +95,7 @@ def create_course_contract(course):
         
         # Wait for confirmation
         try:
-            confirmed_txn = transaction.wait_for_confirmation(algod_client, txid, 4)
+            confirmed_txn = algosdk.wait_for_confirmation(algod_client, txid, 4)
             logger.info(f"Transaction confirmed in round: {confirmed_txn['confirmed-round']}")
             
             # Get asset ID
@@ -161,7 +162,7 @@ def enroll_student(contract_address, student_id, course_id):
         
         # Wait for confirmation
         try:
-            confirmed_txn = transaction.wait_for_confirmation(algod_client, txid, 4)
+            confirmed_txn = algosdk.wait_for_confirmation(algod_client, txid, 4)
             logger.info(f"Transaction confirmed in round: {confirmed_txn['confirmed-round']}")
             
             # Return transaction ID
@@ -325,7 +326,7 @@ def generate_certificate(course_id):
         logger.info(f"Certificate creation transaction ID: {txid}")
         
         # Wait for confirmation
-        confirmed_txn = transaction.wait_for_confirmation(algod_client, txid, 4)
+        confirmed_txn = algosdk.wait_for_confirmation(algod_client, txid, 4)
         logger.info(f"Transaction confirmed in round: {confirmed_txn['confirmed-round']}")
         
         # Get asset ID
