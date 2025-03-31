@@ -10,7 +10,7 @@ from smart_contracts import smart_contracts_bp
 import logging
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all API routes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -152,5 +152,7 @@ def get_dashboard_data():
         })
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()  # Create tables within app context
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
