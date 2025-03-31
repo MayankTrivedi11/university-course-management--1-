@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required as flask_jwt_required, get_jwt_identity as flask_get_jwt_identity
 from models import db, User
 from functools import wraps
 import datetime
@@ -14,19 +14,11 @@ def init_jwt(app):
 def jwt_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
-        
-        if not auth_header:
-            return jsonify({"error": "Authorization header missing"}), 401
-            
-        try:
-            token = auth_header.split(' ')[1]
-            user_id = jwt.decode_token(token)['sub']
-            return f(user_id, *args, **kwargs)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 401
-            
+        return flask_jwt_required()(f)(*args, **kwargs)
     return decorated
+
+def get_jwt_identity():
+    return flask_get_jwt_identity()
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

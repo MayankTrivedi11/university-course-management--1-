@@ -1,13 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
 from models import db, User, Course, Enrollment, Assignment, Grade
-from auth import auth_bp, jwt_required, get_jwt_identity
+from auth import auth_bp, jwt_required, get_jwt_identity, init_jwt
 from courses import courses_bp
 from students import students_bp
 from professors import professors_bp
 from smart_contracts import smart_contracts_bp
 import logging
+import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all API routes
@@ -25,6 +26,7 @@ app.config['ALGORAND_APP_ID'] = os.environ.get('ALGORAND_APP_ID')
 
 # Initialize extensions
 db.init_app(app)
+init_jwt(app)  # Initialize JWT
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -33,10 +35,21 @@ app.register_blueprint(students_bp, url_prefix='/api/students')
 app.register_blueprint(professors_bp, url_prefix='/api/professors')
 app.register_blueprint(smart_contracts_bp, url_prefix='/api/blockchain')
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    logger.info("Database tables created")
+# Root route to test if the server is running
+@app.route('/')
+def index():
+    return jsonify({
+        "status": "ok",
+        "message": "University Course Management API is running",
+        "endpoints": {
+            "health": "/api/health",
+            "auth": "/api/auth/*",
+            "courses": "/api/courses/*",
+            "students": "/api/students/*",
+            "professors": "/api/professors/*",
+            "blockchain": "/api/blockchain/*"
+        }
+    })
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -151,8 +164,19 @@ def get_dashboard_data():
             }
         })
 
+# Error handlers
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "Not found", "message": "The requested resource does not exist"}), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({"error": "Server error", "message": str(e)}), 500
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create tables within app context
+        logger.info("Database tables created")
+    
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
