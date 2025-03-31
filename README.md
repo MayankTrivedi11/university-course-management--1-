@@ -19,3 +19,11 @@ npm run dev
 npm install
 
 npm run dev
+
+**if project is running then # Stop your current development server (Ctrl+C)**
+
+rm -rf .next
+
+npm run build
+
+npm run dev
