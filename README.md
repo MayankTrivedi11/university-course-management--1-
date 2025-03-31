@@ -19,3 +19,11 @@ npm run dev
 npm install
 
 npm run dev
+
+**In canse setver is running for frontend # Stop your current development server (Ctrl+C)**
+
+rm -rf .next
+
+npm run build
+
+npm run dev
