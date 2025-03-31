@@ -9,6 +9,9 @@ pip install -r requirements.txt
 python app.py
 
 **2. Run the Next.js frontend:**
+npm install -D tailwindcss postcss autoprefixer
+
+npm install clsx tailwind-merge
 
 npm install
 
